@@ -1,10 +1,3 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1" import="model.UserBean"%>
-<% if (session.getAttribute("registeredUser") == null) {
-		response.sendRedirect("loginPage.jsp");
-	}
-%>
-<jsp:useBean id="registeredUser" class="model.UserBean" scope="session"/>
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,6 +6,19 @@
  	<title>Geek Factory - Vendita</title>
     <link rel="stylesheet" href="./css/account.css">
     <link rel="icon" href="./img/icon.png">
+    <script>
+        function validateForm() {
+            const invalidChars = /[<>"'/]/;
+            let inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+            for (let input of inputs) {
+                if (invalidChars.test(input.value)) {
+                    alert('Caratteri non validi trovati: <, >, ", \', /');
+                    return false;
+                }
+            }
+            return true;
+        }
+    </script>
 </head>
 <body>
 	<div class="header">
@@ -23,7 +29,7 @@
 	<div class="container" style="height: 540px">
 		<div class="title">Inserisci informazioni sul prodotto</div>
 		<div class="content">
-		<form action="Vendita" enctype="multipart/form-data" METHOD="POST">
+		<form action="Vendita" enctype="multipart/form-data" METHOD="POST" onsubmit="return validateForm()">
 			<div class="user-details">
 				<div class="input-box">
 					<span class="details">Nome prodotto</span>
