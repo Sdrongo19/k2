@@ -1,6 +1,9 @@
 package control;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -52,14 +55,15 @@ public class Register extends HttpServlet {
 		String redirectedPage = "/loginPage.jsp";
 		try {
 			Connection con = DriverManagerConnectionPool.getConnection();
-			String sql = "INSERT INTO UserAccount(email, passwordUser, nome, cognome, indirizzo, telefono, numero, intestatario, CVV) VALUES (?, MD5(?), ?, ?, ?, ?, ?, ?, ?)";
-			String sql2 = "INSERT INTO Cliente(email) VALUES (?)";
-			String sql3 = "INSERT INTO Venditore(email) VALUES (?)";
+			String sql = "INSERT INTO UserAccount(email, passwordUser, nome, cognome, indirizzo, telefono, numero, intestatario, CVV) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
-			//Aggiungi a AccountUser
+			// Codifica la password usando SHA-512
+			String hashtext = hashPassword(password);
+			
+			// Aggiungi a AccountUser
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setString(1, email);
-			ps.setString(2, password);
+			ps.setString(2, hashtext);
 			ps.setString(3, nome);
 			ps.setString(4, cognome);
 			ps.setString(5, indirizzo);
@@ -71,14 +75,16 @@ public class Register extends HttpServlet {
 			ps.executeUpdate();
 			con.commit();
 			
-			//Aggiungi a Cliente
+			// Aggiungi a Cliente
+			String sql2 = "INSERT INTO Cliente(email) VALUES (?)";
 			PreparedStatement ps2 = con.prepareStatement(sql2);
 			ps2.setString(1, email);
 			
 			ps2.executeUpdate();
 			con.commit();
 			
-			//Aggiungi a Venditore
+			// Aggiungi a Venditore
+			String sql3 = "INSERT INTO Venditore(email) VALUES (?)";
 			PreparedStatement ps3 = con.prepareStatement(sql3);
 			ps3.setString(1, email);
 			
@@ -91,5 +97,26 @@ public class Register extends HttpServlet {
 			redirectedPage = "/register-form.jsp";
 		}
 		response.sendRedirect(request.getContextPath() + redirectedPage);
+	}
+	
+	private String hashPassword(String password) {
+	    MessageDigest md = null;
+	    try {
+	        md = MessageDigest.getInstance("SHA-512");
+	    } catch (NoSuchAlgorithmException e) {
+	        e.printStackTrace();
+	        // Gestisci l'eccezione, ad esempio, puoi re-throw come RuntimeException
+	        throw new RuntimeException(e);
+	    }
+	    byte[] messageDigest = md.digest(password.getBytes());
+	    BigInteger number = new BigInteger(1, messageDigest);
+	    StringBuilder hashtext = new StringBuilder(number.toString(16));
+	    
+	    // Aggiungi zeri iniziali per assicurarti che il risultato sia della lunghezza corretta
+	    while (hashtext.length() < 128) {
+	        hashtext.insert(0, "0");
+	    }
+	    
+	    return hashtext.toString();
 	}
 }

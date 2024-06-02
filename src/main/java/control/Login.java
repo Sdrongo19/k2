@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -101,16 +100,20 @@ public class Login extends HttpServlet {
 	private String checkPsw(String psw) {
 		MessageDigest md = null;
 		try {
-			md = MessageDigest.getInstance("MD5");
+			md = MessageDigest.getInstance("SHA-512");
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 		byte[] messageDigest = md.digest(psw.getBytes());
 		BigInteger number = new BigInteger(1, messageDigest);
-		String hashtext = number.toString(16);
+		StringBuilder hashtext = new StringBuilder(number.toString(16));
 		
-		return hashtext;
+		// Aggiungi zeri iniziali per assicurarti che il risultato sia della lunghezza corretta
+		while (hashtext.length() < 128) {
+			hashtext.insert(0, "0");
+		}
+		
+		return hashtext.toString();
 	}
-
 }
