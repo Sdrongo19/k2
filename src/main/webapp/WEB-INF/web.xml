@@ -31,7 +31,6 @@
       <transport-guarantee>
         CONFIDENTIAL
       </transport-guarantee>
-    </user-data-constraint>
     -->
   </security-constraint>
   
@@ -47,5 +46,16 @@
     <error-code>500</error-code>
     <location>/Gestione errori/500.html</location>
   </error-page>
+
+  <!-- Filtro per gli header di sicurezza -->
+  <filter>
+    <filter-name>SecurityHeadersFilter</filter-name>
+    <filter-class>SecurityHeader.SecurityHeadersFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>SecurityHeadersFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
 
 </web-app>
